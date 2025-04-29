@@ -1,0 +1,102 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moodify - Pick Your Mood</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #grid {
+      background: linear-gradient(to right, #f0f4f8, #dbeafe);
+      border: 2px dashed #94a3b8;
+      position: relative;
+    }
+    #face {
+      position: absolute;
+      font-size: 2.5rem;
+      cursor: grab;
+      transition: emoji 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-blue-50 min-h-screen">
+  <nav class="bg-white shadow mb-6 p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-indigo-600">Moodify</h1>
+    <div class="space-x-4">
+      <a href="index.html" class="text-gray-600 hover:text-indigo-600 font-medium">Home</a>
+      <a href="create.html" class="text-gray-600 hover:text-indigo-600 font-medium">Create Playlist</a>
+      <a href="past.html" class="text-gray-600 hover:text-indigo-600 font-medium">Past Playlists</a>
+    </div>
+  </nav>
+
+  <main class="flex flex-col items-center">
+    <h2 class="text-xl font-semibold text-gray-700 mb-4">Drag the face to how you're feeling 🎭</h2>
+    <div id="grid" class="w-[600px] h-[600px] relative mb-4 rounded-xl">
+      <span id="face" style="top: 280px; left: 280px;">😐</span>
+    </div>
+    <p class="text-gray-500">Top = Happy 😊 | Bottom = Sad 😢 | Left = Calm 😌 | Right = Energetic 😤</p>
+  </main>
+
+  <script>
+    const face = document.getElementById('face');
+    const grid = document.getElementById('grid');
+    let dragging = false;
+
+    const moodMap = [
+      ["relax", "lofi", "focus", "deep focus", "ambient", "meditation"],
+      ["happy", "romantic", "dreamy", "uplifting", "mood booster", "summer"],
+      ["dance", "party", "edm", "house", "pop", "hype"],
+      ["workout", "angry", "trap", "metal", "intense", "rage"],
+      ["melancholy", "sad", "rainy day", "breakup", "emotional", "nostalgia"],
+      ["sleep", "chill", "sunset", "coffee shop", "slow jam", "calm"]
+    ];
+
+    let offsetX = 0, offsetY = 0;
+
+    face.addEventListener('mousedown', (e) => {
+      dragging = true;
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+      face.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const rect = grid.getBoundingClientRect();
+      let x = e.clientX - rect.left - offsetX;
+      let y = e.clientY - rect.top - offsetY;
+
+      x = Math.max(0, Math.min(x, rect.width - 40));
+      y = Math.max(0, Math.min(y, rect.height - 40));
+
+      face.style.left = x + 'px';
+      face.style.top = y + 'px';
+
+      // Emoji changes
+      if (y < 150 && x < 150) face.textContent = '😌';
+      else if (y < 150 && x > 450) face.textContent = '😄';
+      else if (y > 450 && x < 150) face.textContent = '😢';
+      else if (y > 450 && x > 450) face.textContent = '😠';
+      else face.textContent = '😐';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      face.style.cursor = 'grab';
+
+      const rect = grid.getBoundingClientRect();
+      const x = parseInt(face.style.left) + 20;
+      const y = parseInt(face.style.top) + 20;
+
+      const col = Math.floor((x / rect.width) * 6);
+      const row = Math.floor((y / rect.height) * 6);
+      const mood = moodMap[row]?.[col] || "chill";
+
+      // Redirect with mood in query string
+      window.location.href = `create.html?mood=${encodeURIComponent(mood)}`;
+    });
+  </script>
+</body>
+</html>
