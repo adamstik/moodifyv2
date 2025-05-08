@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,24 +34,52 @@
     <div id="grid" class="w-[600px] h-[600px] relative mb-4 rounded-xl">
       <span id="face" style="top: 280px; left: 280px;">😐</span>
     </div>
-    <p class="text-gray-500">Top = Happy 😊 | Bottom = Sad 😢 | Left = Calm 😌 | Right = Energetic 😤</p>
+    <p class="text-gray-500 mb-4">Top = Happy 😊 | Bottom = Sad 😢 | Left = Calm 😌 | Right = Energetic 😤</p>
+
+    <div class="my-6 w-[600px]">
+      <label for="intensitySlider" class="block text-center mb-2 text-gray-700">Select Mood Intensity 🎚️</label>
+      <input id="intensitySlider" type="range" min="1" max="10" value="5" class="w-full">
+    </div>
+
+    <div id="keywordPanel" class="flex flex-wrap justify-center gap-4 mb-10"></div>
   </main>
 
   <script>
     const face = document.getElementById('face');
     const grid = document.getElementById('grid');
-    let dragging = false;
+    const keywordPanel = document.getElementById('keywordPanel');
+    const intensitySlider = document.getElementById('intensitySlider');
+    let dragging = false, offsetX = 0, offsetY = 0;
 
-    const moodMap = [
-      ["relax", "lofi", "focus", "deep focus", "ambient", "meditation"],
-      ["happy", "romantic", "dreamy", "uplifting", "mood booster", "summer"],
-      ["dance", "party", "edm", "house", "pop", "hype"],
-      ["workout", "angry", "trap", "metal", "intense", "rage"],
-      ["melancholy", "sad", "rainy day", "breakup", "emotional", "nostalgia"],
-      ["sleep", "chill", "sunset", "coffee shop", "slow jam", "calm"]
-    ];
+    function generateKeywords(x, y, intensity) {
+      const keywords = [];
 
-    let offsetX = 0, offsetY = 0;
+      if (x < 200 && y < 200 && intensity <= 5) {
+        keywords.push("relax", "lofi", "calm");
+      } else if (x > 400 && y < 200 && intensity > 7) {
+        keywords.push("party", "hype", "dance");
+      } else if (x > 400 && y > 400) {
+        keywords.push("trap", "rage", "workout");
+      } else if (x < 200 && y > 400) {
+        keywords.push("melancholy", "sad", "rainy day");
+      } else if (intensity > 8) {
+        keywords.push("intense", "motivational", "driven");
+      } else {
+        keywords.push("chill", "focus", "dreamy");
+      }
+      return keywords;
+    }
+
+    function displayKeywordButtons(words) {
+      keywordPanel.innerHTML = '';
+      words.forEach(word => {
+        const btn = document.createElement('button');
+        btn.textContent = word;
+        btn.className = 'px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700';
+        btn.onclick = () => window.location.href = `create.html?mood=${encodeURIComponent(word)}`;
+        keywordPanel.appendChild(btn);
+      });
+    }
 
     face.addEventListener('mousedown', (e) => {
       dragging = true;
@@ -66,14 +93,16 @@
       const rect = grid.getBoundingClientRect();
       let x = e.clientX - rect.left - offsetX;
       let y = e.clientY - rect.top - offsetY;
-
       x = Math.max(0, Math.min(x, rect.width - 40));
       y = Math.max(0, Math.min(y, rect.height - 40));
-
       face.style.left = x + 'px';
       face.style.top = y + 'px';
 
-      // Emoji changes
+      const sliderVal = parseInt(intensitySlider.value);
+      const keywords = generateKeywords(x, y, sliderVal);
+      displayKeywordButtons(keywords);
+
+      // Dynamic emoji
       if (y < 150 && x < 150) face.textContent = '😌';
       else if (y < 150 && x > 450) face.textContent = '😄';
       else if (y > 450 && x < 150) face.textContent = '😢';
@@ -82,20 +111,8 @@
     });
 
     document.addEventListener('mouseup', () => {
-      if (!dragging) return;
       dragging = false;
       face.style.cursor = 'grab';
-
-      const rect = grid.getBoundingClientRect();
-      const x = parseInt(face.style.left) + 20;
-      const y = parseInt(face.style.top) + 20;
-
-      const col = Math.floor((x / rect.width) * 6);
-      const row = Math.floor((y / rect.height) * 6);
-      const mood = moodMap[row]?.[col] || "chill";
-
-      // Redirect with mood in query string
-      window.location.href = `create.html?mood=${encodeURIComponent(mood)}`;
     });
   </script>
 </body>
