@@ -10,12 +10,20 @@
       background: linear-gradient(to right, #f0f4f8, #dbeafe);
       border: 2px dashed #94a3b8;
       position: relative;
+      background-image:
+        linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px);
+      background-size: calc(100% / 6) calc(100% / 6);
     }
     #face {
       position: absolute;
       font-size: 2.5rem;
       cursor: grab;
       transition: emoji 0.3s ease;
+    }
+    .corner-emoji {
+      position: absolute;
+      font-size: 1.5rem;
     }
   </style>
 </head>
@@ -33,8 +41,11 @@
     <h2 class="text-xl font-semibold text-gray-700 mb-4">Drag the face to how you're feeling 🎭</h2>
     <div id="grid" class="w-[600px] h-[600px] relative mb-4 rounded-xl">
       <span id="face" style="top: 280px; left: 280px;">😐</span>
+      <span class="corner-emoji" style="top: 8px; left: 8px;">😌</span>
+      <span class="corner-emoji" style="top: 8px; right: 8px;">😄</span>
+      <span class="corner-emoji" style="bottom: 8px; left: 8px;">😢</span>
+      <span class="corner-emoji" style="bottom: 8px; right: 8px;">😠</span>
     </div>
-    <p class="text-gray-500 mb-4">Top = Happy 😊 | Bottom = Sad 😢 | Left = Calm 😌 | Right = Energetic 😤</p>
 
     <div class="my-6 w-[600px]">
       <label for="intensitySlider" class="block text-center mb-2 text-gray-700">Select Mood Intensity 🎚️</label>
@@ -102,7 +113,6 @@
       const keywords = generateKeywords(x, y, sliderVal);
       displayKeywordButtons(keywords);
 
-      // Dynamic emoji
       if (y < 150 && x < 150) face.textContent = '😌';
       else if (y < 150 && x > 450) face.textContent = '😄';
       else if (y > 450 && x < 150) face.textContent = '😢';
