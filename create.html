@@ -1,4 +1,4 @@
-<!-- create.html (Fixed Spotify query) -->
+<!-- create.html with genre integration -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,25 +68,26 @@
       accessToken = data.access_token;
     }
 
-    function getMoodFromURL() {
+    function getParams() {
       const params = new URLSearchParams(window.location.search);
-      return params.get('mood') || 'chill';
+      return {
+        mood: params.get('mood') || 'chill',
+        genres: params.get('genres') || ''
+      };
     }
 
-    async function fetchSongsByMood(mood) {
+    async function fetchSongsByMood(mood, genres) {
       if (!accessToken) await getSpotifyAccessToken();
-
-      const searchQuery = `${mood} mood`; // Keep search tight and English-focused
-      const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=20&market=US`, {
+      const genreArray = genres.split(',').map(g => `genre:${g.trim()}`).filter(Boolean);
+      const genreString = genreArray.length ? genreArray.join(' ') : '';
+      const searchQuery = `${mood} ${genreString}`;
+      const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=30&market=US`, {
         headers: {
           "Authorization": `Bearer ${accessToken}`
         }
       });
-
       const data = await response.json();
-      const allTracks = data.tracks?.items || [];
-
-      return allTracks.filter(track => track.explicit === false && track.name && track.artists.length > 0);
+      return (data.tracks?.items || []).filter(track => track.name && track.artists.length > 0);
     }
 
     function displaySongs(songs) {
@@ -154,14 +155,15 @@
     }
 
     async function saveFakePlaylistToFirebase() {
-      const mood = getMoodFromURL();
+      const { mood, genres } = getParams();
       if (fakePlaylist.length === 0) {
         alert("Your playlist is empty! Add some songs first.");
         return;
       }
       try {
         await db.collection("playlists").add({
-          mood: mood,
+          mood,
+          genres,
           songs: fakePlaylist.map(song => ({
             title: song.title,
             artist: song.artist,
@@ -180,9 +182,9 @@
     }
 
     async function initPage() {
-      const mood = getMoodFromURL();
-      document.getElementById("moodTitle").textContent = `Suggested songs for: ${mood}`;
-      const songs = await fetchSongsByMood(mood);
+      const { mood, genres } = getParams();
+      document.getElementById("moodTitle").textContent = `Suggested songs for: ${mood}` + (genres ? ` + [${genres}]` : '');
+      const songs = await fetchSongsByMood(mood, genres);
       displaySongs(songs);
     }
 
