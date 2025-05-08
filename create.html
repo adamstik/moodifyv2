@@ -1,4 +1,4 @@
-<!-- create.html using Spotify Recommendations API -->
+<!-- create.html using enhanced keyword search (rolled back from Recommendations API) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,45 +76,19 @@
       };
     }
 
-    function getMoodValence(mood) {
-      const moodValenceMap = {
-        joyful: 0.9,
-        happy: 0.85,
-        calm: 0.4,
-        peaceful: 0.3,
-        sad: 0.1,
-        melancholy: 0.15,
-        angry: 0.2,
-        hyped: 0.8,
-        uplifted: 0.75,
-        motivated: 0.7,
-        burnedout: 0.2,
-        chill: 0.5,
-        dreamy: 0.6
-      };
-      return moodValenceMap[mood.toLowerCase()] || 0.5;
-    }
-
     async function fetchSongsByMood(mood, genres) {
       if (!accessToken) await getSpotifyAccessToken();
-      const genreArray = genres.split(',').map(g => g.trim()).filter(Boolean);
-      const valence = getMoodValence(mood);
+      const searchTerms = [mood, ...genres.split(',').map(g => g.trim()).filter(Boolean)];
+      const searchQuery = searchTerms.join(' ');
 
-      const endpoint = 'https://api.spotify.com/v1/recommendations';
-      const params = new URLSearchParams({
-        seed_genres: genreArray.slice(0, 5).join(','),
-        target_valence: valence,
-        limit: 30,
-        market: 'US'
-      });
-
-      const response = await fetch(`${endpoint}?${params.toString()}`, {
+      const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=30&market=US`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
       });
+
       const data = await response.json();
-      return data.tracks || [];
+      return (data.tracks?.items || []).filter(track => track.name && track.artists.length > 0);
     }
 
     function displaySongs(songs) {
