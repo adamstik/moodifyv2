@@ -1,4 +1,4 @@
-<!-- index.html (Smarter Mood Grid + Genre Picker) -->
+<!-- index.html with larger grid and unique mood keywords per zone -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +14,7 @@
       background-image:
         linear-gradient(to right, rgba(0,0,0,0.1) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(0,0,0,0.1) 1px, transparent 1px);
-      background-size: calc(100% / 8) calc(100% / 8);
+      background-size: calc(100% / 6) calc(100% / 6);
     }
     #face {
       position: absolute;
@@ -40,22 +40,17 @@
 
   <main class="flex flex-col items-center">
     <h2 class="text-xl font-semibold text-gray-700 mb-4">Drag the emoji to how you're feeling 🎭</h2>
-    <div id="grid" class="w-[400px] h-[400px] relative mb-4 rounded-xl">
-      <span id="face" style="top: 180px; left: 180px;">😐</span>
+    <div id="grid" class="w-[600px] h-[600px] relative mb-4 rounded-xl">
+      <span id="face" style="top: 280px; left: 280px;">😐</span>
       <span class="corner-emoji" style="top: 4px; left: 4px;">😌</span>
       <span class="corner-emoji" style="top: 4px; right: 4px;">😄</span>
       <span class="corner-emoji" style="bottom: 4px; left: 4px;">😢</span>
       <span class="corner-emoji" style="bottom: 4px; right: 4px;">😠</span>
     </div>
 
-    <div class="my-4 w-[400px]">
+    <div class="my-4 w-[600px]">
       <label for="intensitySlider" class="block text-center mb-2 text-gray-700">Mood Intensity 🎚️</label>
       <input id="intensitySlider" type="range" min="1" max="10" value="5" class="w-full">
-    </div>
-
-    <div class="w-[400px] mb-4">
-      <p class="text-center text-gray-700 font-medium mb-2">Choose up to 5 genres to match your vibe 🎧</p>
-      <div id="genrePanel" class="flex flex-wrap gap-2 justify-center"></div>
     </div>
 
     <button id="goButton" class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Generate Playlist</button>
@@ -64,43 +59,25 @@
   <script>
     const face = document.getElementById('face');
     const grid = document.getElementById('grid');
-    const genrePanel = document.getElementById('genrePanel');
     const intensitySlider = document.getElementById('intensitySlider');
     const goButton = document.getElementById('goButton');
     let dragging = false, offsetX = 0, offsetY = 0;
     let selectedMood = 'chill';
-    let selectedGenres = [];
 
-    const genres = ["pop", "rock", "edm", "indie", "lofi", "jazz", "blues", "r&b", "hip-hop", "trap", "house", "metal", "folk", "acoustic"];
+    function mapMood(x, y) {
+      const cellX = Math.floor(x / 100);
+      const cellY = Math.floor(y / 100);
 
-    genres.forEach(genre => {
-      const btn = document.createElement('button');
-      btn.textContent = genre;
-      btn.className = 'px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-indigo-200';
-      btn.onclick = () => {
-        if (selectedGenres.includes(genre)) {
-          selectedGenres = selectedGenres.filter(g => g !== genre);
-          btn.classList.remove('bg-indigo-500', 'text-white');
-          btn.classList.add('bg-gray-200', 'text-gray-800');
-        } else if (selectedGenres.length < 5) {
-          selectedGenres.push(genre);
-          btn.classList.remove('bg-gray-200', 'text-gray-800');
-          btn.classList.add('bg-indigo-500', 'text-white');
-        }
-      };
-      genrePanel.appendChild(btn);
-    });
+      const moodGrid = [
+        ["peaceful", "dreamy", "playful", "optimistic", "excited", "joyful"],
+        ["content", "relaxed", "curious", "inspired", "hopeful", "energized"],
+        ["bored", "indifferent", "neutral", "focused", "thoughtful", "alert"],
+        ["drained", "gloomy", "insecure", "numb", "restless", "anxious"],
+        ["melancholy", "lonely", "wistful", "moody", "tense", "impatient"],
+        ["sad", "burned out", "frustrated", "angry", "furious", "overwhelmed"]
+      ];
 
-    function mapMood(x, y, intensity) {
-      if (x < 100 && y < 100) return "tranquil";
-      if (x > 300 && y < 100) return "joyful";
-      if (x < 100 && y > 300) return "melancholy";
-      if (x > 300 && y > 300) return "angry";
-      if (y < 100) return "uplifted";
-      if (y > 300) return "burned out";
-      if (x < 100) return "calm";
-      if (x > 300) return "hyped";
-      return intensity > 7 ? "motivated" : "chill";
+      return moodGrid[cellY]?.[cellX] || "chill";
     }
 
     face.addEventListener('mousedown', (e) => {
@@ -120,13 +97,12 @@
       face.style.left = x + 'px';
       face.style.top = y + 'px';
 
-      const sliderVal = parseInt(intensitySlider.value);
-      selectedMood = mapMood(x, y, sliderVal);
+      selectedMood = mapMood(x, y);
 
       if (y < 100 && x < 100) face.textContent = '😌';
-      else if (y < 100 && x > 300) face.textContent = '😄';
-      else if (y > 300 && x < 100) face.textContent = '😢';
-      else if (y > 300 && x > 300) face.textContent = '😠';
+      else if (y < 100 && x > 500) face.textContent = '😄';
+      else if (y > 500 && x < 100) face.textContent = '😢';
+      else if (y > 500 && x > 500) face.textContent = '😠';
       else face.textContent = '😐';
     });
 
@@ -136,9 +112,7 @@
     });
 
     goButton.onclick = () => {
-      const genreString = selectedGenres.join(',');
-      const query = `create.html?mood=${encodeURIComponent(selectedMood)}&genres=${encodeURIComponent(genreString)}`;
-      window.location.href = query;
+      window.location.href = `create.html?mood=${encodeURIComponent(selectedMood)}`;
     };
   </script>
 </body>
