@@ -1,3 +1,4 @@
+<!-- index.html (Regenerated Final Enhanced Version) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -64,19 +65,24 @@
 
     function generateKeywords(x, y, intensity) {
       const keywords = [];
-
-      if (x < 200 && y < 200 && intensity <= 5) {
-        keywords.push("relax", "lofi", "calm");
-      } else if (x > 400 && y < 200 && intensity > 7) {
-        keywords.push("party", "hype", "dance");
-      } else if (x > 400 && y > 400) {
-        keywords.push("trap", "rage", "workout");
+      if (x < 200 && y < 200 && intensity <= 4) {
+        keywords.push("tranquil", "grounded", "mindful", "serene", "still", "content");
+      } else if (x < 200 && y < 200 && intensity > 4) {
+        keywords.push("uplifted", "inspired", "hopeful", "optimistic", "radiant", "joyful");
+      } else if (x > 400 && y < 200 && intensity > 6) {
+        keywords.push("ecstatic", "hyped", "celebratory", "pumped", "euphoric", "lively");
       } else if (x < 200 && y > 400) {
-        keywords.push("melancholy", "sad", "rainy day");
+        keywords.push("melancholy", "lonely", "wistful", "numb", "blue", "moody");
+      } else if (x > 400 && y > 400) {
+        keywords.push("furious", "fired up", "agitated", "driven", "powerful", "unleashed");
+      } else if (x >= 200 && x <= 400 && y < 200) {
+        keywords.push("cheerful", "playful", "romantic", "bubbly", "sunny", "bouncy");
+      } else if (x >= 200 && x <= 400 && y > 400) {
+        keywords.push("burned out", "drained", "disconnected", "tired", "reflective", "aching");
       } else if (intensity > 8) {
-        keywords.push("intense", "motivational", "driven");
+        keywords.push("intense", "motivated", "empowered", "reckless", "on fire", "raging");
       } else {
-        keywords.push("chill", "focus", "dreamy");
+        keywords.push("daydreaming", "calm", "focused", "ambient", "neutral", "peaceful");
       }
       return keywords;
     }
