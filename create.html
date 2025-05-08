@@ -1,4 +1,4 @@
-<!-- create.html using enhanced keyword search (rolled back from Recommendations API) -->
+<!-- create.html (No genre support, mood only) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,19 +68,15 @@
       accessToken = data.access_token;
     }
 
-    function getParams() {
+    function getMoodFromURL() {
       const params = new URLSearchParams(window.location.search);
-      return {
-        mood: params.get('mood') || 'chill',
-        genres: params.get('genres') || ''
-      };
+      return params.get('mood') || 'chill';
     }
 
-    async function fetchSongsByMood(mood, genres) {
+    async function fetchSongsByMood(mood) {
       if (!accessToken) await getSpotifyAccessToken();
-      const searchTerms = [mood, ...genres.split(',').map(g => g.trim()).filter(Boolean)];
-      const searchQuery = searchTerms.join(' ');
 
+      const searchQuery = `${mood} mood`;
       const response = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(searchQuery)}&type=track&limit=30&market=US`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
@@ -156,7 +152,7 @@
     }
 
     async function saveFakePlaylistToFirebase() {
-      const { mood, genres } = getParams();
+      const mood = getMoodFromURL();
       if (fakePlaylist.length === 0) {
         alert("Your playlist is empty! Add some songs first.");
         return;
@@ -164,7 +160,6 @@
       try {
         await db.collection("playlists").add({
           mood,
-          genres,
           songs: fakePlaylist.map(song => ({
             title: song.title,
             artist: song.artist,
@@ -183,9 +178,9 @@
     }
 
     async function initPage() {
-      const { mood, genres } = getParams();
-      document.getElementById("moodTitle").textContent = `Suggested songs for: ${mood}` + (genres ? ` + [${genres}]` : '');
-      const songs = await fetchSongsByMood(mood, genres);
+      const mood = getMoodFromURL();
+      document.getElementById("moodTitle").textContent = `Suggested songs for: ${mood}`;
+      const songs = await fetchSongsByMood(mood);
       displaySongs(songs);
     }
 
