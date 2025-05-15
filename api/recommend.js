@@ -19,14 +19,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Mood is required' });
   }
 
-  const prompt = `
-Give me a list of 8 songs that match the mood "${mood}".
-Only return JSON in this format:
-[
-  { "title": "Song Name", "artist": "Artist Name" },
-  ...
-]
-  `.trim();
+ const prompt = `
+Return ONLY a JSON array (no explanation) of 8 songs that match the mood "${mood}".
+Each item must have this format:
+{ "title": "Song Name", "artist": "Artist Name" }
+Only return the JSON array. Do NOT include any text or comments outside the array.
+`.trim();
 
   try {
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
