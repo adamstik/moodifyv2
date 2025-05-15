@@ -1,4 +1,4 @@
-<!-- index.html with emotion grid that passes mood to create.html for AI recommendation -->
+<!-- index.html with smaller grid, fixed nav, and optional text input for custom mood -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +29,7 @@
   </style>
 </head>
 <body class="bg-blue-50 min-h-screen">
-  <nav class="bg-white shadow mb-6 p-4 flex justify-between items-center">
+  <nav class="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-50">
     <h1 class="text-2xl font-bold text-indigo-600">Moodify</h1>
     <div class="space-x-4">
       <a href="index.html" class="text-gray-600 hover:text-indigo-600 font-medium">Home</a>
@@ -38,22 +38,28 @@
     </div>
   </nav>
 
-  <main class="flex flex-col items-center">
-    <h2 class="text-xl font-semibold text-gray-700 mb-4">Drag the emoji to how you're feeling 🎭</h2>
-    <div id="grid" class="w-[600px] h-[600px] relative mb-4 rounded-xl">
-      <span id="face" style="top: 280px; left: 280px;">😐</span>
+  <main class="flex flex-col items-center px-4">
+    <h2 class="text-xl font-semibold text-gray-700 my-4 text-center">Drag the emoji to how you're feeling 🎭</h2>
+
+    <div id="grid" class="w-[420px] h-[420px] relative mb-4 rounded-xl">
+      <span id="face" style="top: 190px; left: 190px;">😐</span>
       <span class="corner-emoji" style="top: 4px; left: 4px;">😌</span>
       <span class="corner-emoji" style="top: 4px; right: 4px;">😄</span>
       <span class="corner-emoji" style="bottom: 4px; left: 4px;">😢</span>
       <span class="corner-emoji" style="bottom: 4px; right: 4px;">😠</span>
     </div>
 
-    <div class="my-4 w-[600px]">
+    <div class="my-4 w-[420px]">
       <label for="intensitySlider" class="block text-center mb-2 text-gray-700">Mood Intensity 🎚️</label>
       <input id="intensitySlider" type="range" min="1" max="10" value="5" class="w-full">
     </div>
 
-    <button id="goButton" class="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Generate Playlist</button>
+    <div class="my-4 w-[420px]">
+      <label for="customMood" class="block text-center mb-2 text-gray-700">Or type your own mood 💬</label>
+      <input id="customMood" type="text" placeholder="e.g. nostalgic, hopeful, confused..." class="w-full px-4 py-2 rounded-lg border border-gray-300" />
+    </div>
+
+    <button id="goButton" class="mb-10 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700">Generate Playlist</button>
   </main>
 
   <script>
@@ -61,12 +67,14 @@
     const grid = document.getElementById('grid');
     const intensitySlider = document.getElementById('intensitySlider');
     const goButton = document.getElementById('goButton');
+    const customMoodInput = document.getElementById('customMood');
+
     let dragging = false, offsetX = 0, offsetY = 0;
     let selectedMood = 'chill';
 
     function mapMood(x, y) {
-      const cellX = Math.floor(x / 100);
-      const cellY = Math.floor(y / 100);
+      const cellX = Math.floor(x / 70);
+      const cellY = Math.floor(y / 70);
 
       const moodGrid = [
         ["peaceful", "dreamy", "playful", "optimistic", "excited", "joyful"],
@@ -100,9 +108,9 @@
       selectedMood = mapMood(x, y);
 
       if (y < 100 && x < 100) face.textContent = '😌';
-      else if (y < 100 && x > 500) face.textContent = '😄';
-      else if (y > 500 && x < 100) face.textContent = '😢';
-      else if (y > 500 && x > 500) face.textContent = '😠';
+      else if (y < 100 && x > 300) face.textContent = '😄';
+      else if (y > 300 && x < 100) face.textContent = '😢';
+      else if (y > 300 && x > 300) face.textContent = '😠';
       else face.textContent = '😐';
     });
 
@@ -112,7 +120,9 @@
     });
 
     goButton.onclick = () => {
-      window.location.href = `create.html?mood=${encodeURIComponent(selectedMood)}`;
+      const typedMood = customMoodInput.value.trim();
+      const moodToUse = typedMood || selectedMood;
+      window.location.href = `create.html?mood=${encodeURIComponent(moodToUse)}`;
     };
   </script>
 </body>
