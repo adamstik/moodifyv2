@@ -43,8 +43,10 @@ Only return JSON in this format:
     });
 
     const json = await openaiRes.json();
-    const message = json.choices?.[0]?.message?.content || "";
+    console.log("FULL GPT RESPONSE:", JSON.stringify(json, null, 2));
+const message = json.choices?.[0]?.message?.content || "(empty)";
 console.log("RAW GPT RESPONSE:", message);
+
 
 try {
   const match = message.match(/\[.*\]/s);
