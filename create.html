@@ -1,4 +1,4 @@
-<!-- create.html with AI-generated recommendations from moodifyv2.vercel.app/api/recommend -->
+<!-- create.html with loading spinner added -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +22,13 @@
 
   <main class="max-w-6xl mx-auto px-6">
     <h2 id="moodTitle" class="text-2xl font-semibold text-center text-indigo-700 mb-8">Generating AI-powered playlist...</h2>
-    <div id="playlist" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10"></div>
+
+    <!-- Spinner -->
+    <div id="loading" class="flex justify-center mb-10">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-indigo-500"></div>
+    </div>
+
+    <div id="playlist" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 hidden"></div>
 
     <div id="myPlaylist" class="mb-16">
       <h2 class="text-2xl font-bold mb-4 text-center text-indigo-700">🎵 Your Playlist</h2>
@@ -77,12 +83,18 @@
     }
 
     async function getSongsFromAI(mood) {
-      const res = await fetch('https://moodifyv2.vercel.app/api/recommend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mood })
-      });
-      return await res.json();
+      try {
+        const res = await fetch('https://moodifyv2.vercel.app/api/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mood })
+        });
+        if (!res.ok) throw new Error("AI request failed");
+        return await res.json();
+      } catch (err) {
+        console.error("AI recommendation failed:", err);
+        return [];
+      }
     }
 
     async function searchSpotifySongs(aiSongs) {
@@ -99,7 +111,9 @@
     }
 
     function displaySongs(songs) {
+      document.getElementById('loading').classList.add('hidden');
       const playlistContainer = document.getElementById('playlist');
+      playlistContainer.classList.remove('hidden');
       playlistContainer.innerHTML = songs.map(song => `
         <div class="bg-white p-5 rounded-xl shadow-lg flex flex-col items-center">
           <img src="${song.album.images[0]?.url || 'https://via.placeholder.com/300'}" class="rounded-xl w-full h-48 object-cover mb-4" />
