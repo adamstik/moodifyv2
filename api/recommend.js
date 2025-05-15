@@ -44,11 +44,19 @@ Only return JSON in this format:
 
     const json = await openaiRes.json();
     const message = json.choices?.[0]?.message?.content || "";
+console.log("RAW GPT RESPONSE:", message);
 
-    const match = message.match(/\[.*\]/s);
-    if (!match) throw new Error("No JSON detected.");
+try {
+  const match = message.match(/\[.*\]/s);
+  if (!match) throw new Error("No JSON detected.");
 
-    const songs = JSON.parse(match[0]);
+  const songs = JSON.parse(match[0]);
+  return res.status(200).json(songs);
+} catch (err) {
+  console.error("GPT parse error:", err);
+  return res.status(500).json({ error: "Failed to parse ChatGPT response." });
+}
+
     return res.status(200).json(songs);
   } catch (err) {
     console.error("Error:", err);
